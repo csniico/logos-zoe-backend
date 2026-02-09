@@ -11,6 +11,7 @@ import {
   Text,
 } from '@react-email/components';
 import { JSX } from 'react/jsx-dev-runtime';
+import React from 'react';
 
 interface PrayerRequestTemplateProps {
   title: string;
