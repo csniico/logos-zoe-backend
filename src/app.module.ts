@@ -4,7 +4,7 @@ import { Connection } from 'mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User, UserSchema } from './users/schema/user.schema';
 import { UserSeeder } from './users/users.seeder';
 import { AuthModule } from './auth/auth.module';
@@ -19,6 +19,7 @@ import { PodcastModule } from './podcast/podcast.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { MailerModule } from './mailer/mailer.module';
 import { Podcast, PodcastSchema } from './podcast/schema/podcast.schema';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
@@ -43,13 +44,6 @@ import { Podcast, PodcastSchema } from './podcast/schema/podcast.schema';
         const appName = process.env.MONGO_APP_NAME || 'app';
 
         const connectionString = `mongodb+srv://${user}:${password}@${host}/${database}?retryWrites=true&w=majority&appName=${appName}`;
-
-        // Log connection details (without exposing password)
-        Logger.log(`Connecting to MongoDB...`, 'MongoDBConnection');
-        Logger.log(`Host: ${host}`, 'MongoDBConnection');
-        Logger.log(`Database: ${database}`, 'MongoDBConnection');
-        Logger.log(`App Name: ${appName}`, 'MongoDBConnection');
-        Logger.log(`User: ${process.env.MONGO_USER}`, 'MongoDBConnection');
 
         return connectionString;
       })(),
@@ -79,6 +73,19 @@ import { Podcast, PodcastSchema } from './podcast/schema/podcast.schema';
       { name: User.name, schema: UserSchema },
       { name: Podcast.name, schema: PodcastSchema },
     ]),
+    BullModule.forRootAsync({
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          url: configService.get<string>('REDIS_URL', 'redis://localhost:6379'),
+          password: configService.get<string>('REDIS_PASSWORD', ''),
+        },
+        defaultJobOptions: {
+          removeOnComplete: true,
+          attempts: 3,
+        },
+      }),
+      inject: [ConfigService],
+    }),
     AuthModule,
     DevotionalsModule,
     StorageModule,

@@ -97,7 +97,8 @@ export class UserService {
   async createUser(dto: createUserDto) {
     try {
       const userExists = await this.userModel.findOne({ email: dto.email });
-      if (userExists && userExists.email) {
+      if (userExists) {
+        // redirect the user to verify their email instead of throwing an error
         throw new ConflictException('User already exists');
       }
 

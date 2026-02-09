@@ -3,17 +3,8 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as os from 'os';
-
-async function getPublicIp(): Promise<string> {
-  try {
-    const response = await fetch('https://api.ipify.org?format=json');
-    const data = (await response.json()) as { ip: string };
-    return data.ip;
-  } catch {
-    return 'Unable to fetch';
-  }
-}
 
 function getLocalIpAddress(): string {
   const interfaces = os.networkInterfaces();
@@ -56,25 +47,25 @@ async function bootstrap() {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   instance.disable('x-powered-by');
 
+  const config = new DocumentBuilder()
+    .setTitle('Logos Zoe')
+    .setDescription('API documentation for logos zoe')
+    .setVersion('0.0.1')
+    .build();
+
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, documentFactory);
+
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
 
   // Get IP addresses
   const localIp = getLocalIpAddress();
-  const publicIp = await getPublicIp();
 
   // Log server information
-  console.log('\n==============================================');
   console.log('Server started successfully!');
-  console.log('==============================================');
-  console.log(`📍 Local:        http://localhost:${port}`);
-  console.log(`🌐 Network:      http://${localIp}:${port}`);
-  console.log(`🌍 Public IP:    ${publicIp}`);
-  console.log(`⚙️  Environment:  ${process.env.NODE_ENV || 'development'}`);
-  console.log('==============================================\n');
+  console.log(`Local:        http://localhost:${port}`);
+  console.log(`Network:      http://${localIp}:${port}`);
+  console.log(`Environment:  ${process.env.NODE_ENV || 'development'}`);
 }
-bootstrap()
-  .then(() => {
-    // Additional success message if needed
-  })
-  .catch(console.error);
+bootstrap().catch(console.error);

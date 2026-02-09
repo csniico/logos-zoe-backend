@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import nodemailer from 'nodemailer';
 import { ContactMessage } from './schema/contact-message.schema';
 import { SendContactEmailDto } from './dto/send-contact-email.dto';
+import { MailOptions } from 'nodemailer/lib/sendmail-transport';
 
 @Injectable()
 export class MailerService {
@@ -23,6 +24,10 @@ export class MailerService {
         pass: this.configService.get<string>('MAIL_APP_PASSWORD'),
       },
     });
+  }
+
+  async sendEmail(mailOptions: MailOptions): Promise<void> {
+    await this.transporter.sendMail(mailOptions);
   }
 
   async sendContactEmail(

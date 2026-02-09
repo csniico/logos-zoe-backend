@@ -1,6 +1,8 @@
 onlyBuiltDependencies:
   - '@nestjs/core'
+  - '@scarf/scarf'
   - bcrypt
   - ffmpeg-static
+  - msgpackr-extract
   - sharp
   - unrs-resolver

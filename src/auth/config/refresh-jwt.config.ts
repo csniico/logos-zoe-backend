@@ -8,12 +8,12 @@ export default registerAs('refreshjwt', (): JwtSignOptions => {
   const configService = new ConfigService();
   const refreshJwtSecret = configService.get<string>('REFRESH_JWT_SECRET');
   const refreshJwtExpiresIn = configService.get<StringValue>(
-    'REFRESH_JWT_EXPIRES_IN',
+    'REFRESH_JWT_EXPIRE_IN',
   );
 
   if (!refreshJwtSecret || !refreshJwtExpiresIn) {
     logger.error(
-      'Missing config variables in - REFRESH_JWT_SECRET | REFRESH_JWT_EXPIRES_IN',
+      'Missing config variables in - REFRESH_JWT_SECRET | REFRESH_JWT_EXPIRE_IN',
     );
     throw new InternalServerErrorException('Server Configuration error.');
   }
